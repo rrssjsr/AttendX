@@ -1,9 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AttendX — NMIMS Attendance Calculator</title>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NL3VXFQX89"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-NL3VXFQX89');
+    </script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -15,24 +25,52 @@
         }
 
         :root {
-            --bg-main: #f5f0ff;
-            --bg-secondary: #fef6f0;
+            --bg-main: #F4F3FF;
+            --bg-secondary: #EEEEFF;
             --card-pink: #ffb6c1;
-            --card-yellow: #fff176;
-            --card-mint: #a8f0d4;
-            --card-lavender: #e0d4ff;
-            --card-peach: #ffd4b8;
+            --card-yellow: #FFD6A5;
+            --card-mint: #8AF3D0;
+            --card-lavender: #DAD8FF;
+            --card-peach: #FFD6A5;
             --card-sky: #b8e4ff;
             --card-cream: #fff8e7;
-            --accent: #7c3aed;
-            --accent-dark: #5b21b6;
-            --text-dark: #1a1a2e;
+            --accent: #5B5FEF;
+            --accent-dark: #4648c7;
+            --text-dark: #111827;
             --text-medium: #4a4a6a;
-            --border-dark: #1a1a2e;
+            --border-dark: #1F2937;
             --white: #ffffff;
-            --shadow: 4px 4px 0px #1a1a2e;
-            --shadow-sm: 2px 2px 0px #1a1a2e;
+            --shadow: 4px 4px 0px #1F2937;
+            --shadow-sm: 2px 2px 0px #1F2937;
         }
+
+        [data-theme="dark"] {
+            --bg-main: #1a1a1a;
+            --bg-secondary: #242424;
+            --card-pink: #2d2d2d;
+            --card-yellow: #2d2d2d;
+            --card-mint: #2a2f2d;
+            --card-lavender: #2a2a32;
+            --card-peach: #2d2a28;
+            --card-sky: #282d30;
+            --card-cream: #2a2a28;
+            --accent: #8b8bf5;
+            --accent-dark: #7a7ae0;
+            --text-dark: #ececec;
+            --text-medium: #a8a8a8;
+            --border-dark: #3d3d3d;
+            --white: #262626;
+            --shadow: none;
+            --shadow-sm: none;
+        }
+        
+        [data-theme="dark"] .stat-box.present { background: #1a3329; }
+        [data-theme="dark"] .stat-box.absent { background: #332922; }
+        [data-theme="dark"] .stat-box.total { background: #262638; }
+        [data-theme="dark"] .stat-box.overall { background: var(--accent); }
+        [data-theme="dark"] .upload-box { background: #1f2a26; }
+        [data-theme="dark"] .instructions { background: #262626; }
+        [data-theme="dark"] .student-card { background: #262638; }
 
         body {
             font-family: 'Outfit', sans-serif;
@@ -82,6 +120,25 @@
             font-weight: 900;
             color: var(--text-dark);
             letter-spacing: -1px;
+        }
+
+        .theme-btn {
+            width: 44px;
+            height: 44px;
+            background: var(--white);
+            border: 2px solid var(--border-dark);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.05);
+            background: var(--bg-secondary);
         }
 
         /* Instructions */
@@ -143,11 +200,13 @@
         .step-item a {
             color: var(--accent);
             font-weight: 700;
-            text-decoration: none;
+            text-decoration: underline;
+            text-underline-offset: 3px;
         }
 
         .step-item a:hover {
             text-decoration: underline;
+            text-decoration-thickness: 2px;
         }
 
         .portal-alert {
@@ -399,12 +458,6 @@
             margin-bottom: 16px;
         }
 
-        @media (max-width: 600px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
         .stat-box {
             border: 3px solid var(--border-dark);
             border-radius: 16px;
@@ -419,10 +472,49 @@
             box-shadow: 6px 6px 0px var(--border-dark);
         }
 
-        .stat-box.total { background: var(--card-sky); }
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 900;
+            font-family: 'Space Mono', monospace;
+            color: var(--text-dark);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            opacity: 0.8;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .stat-box {
+                padding: 18px 12px;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+            
+            .stat-label {
+                font-size: 0.75rem;
+            }
+        }
+
+        .stat-box.total { background: var(--card-lavender); }
         .stat-box.present { background: var(--card-mint); }
-        .stat-box.absent { background: var(--card-pink); }
-        .stat-box.overall { background: var(--card-yellow); }
+        .stat-box.absent { background: var(--card-yellow); }
+        .stat-box.overall { background: var(--accent); }
+
+        .stat-box.overall .stat-number,
+        .stat-box.overall .stat-label { color: var(--white); }
 
         .stat-number {
             font-size: 2rem;
@@ -653,6 +745,9 @@
                 <div class="logo-box">X</div>
                 <span class="logo-text">AttendX</span>
             </div>
+            <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">
+                <span id="themeIcon">☀</span>
+            </button>
         </header>
 
         <div class="instructions">
@@ -751,6 +846,23 @@
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // Theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('attendx-theme', next);
+            document.getElementById('themeIcon').textContent = next === 'dark' ? '☾' : '☀';
+        }
+
+        // Load saved theme - default to light always
+        const savedTheme = localStorage.getItem('attendx-theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        if (document.getElementById('themeIcon')) {
+            document.getElementById('themeIcon').textContent = savedTheme === 'dark' ? '☾' : '☀';
+        }
 
         // Upload handlers
         const uploadBox = document.getElementById('uploadBox');
@@ -912,10 +1024,6 @@
             const overall = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
 
             document.getElementById('statsGrid').innerHTML = `
-                <div class="stat-box total">
-                    <div class="stat-number">${total}</div>
-                    <div class="stat-label">Total</div>
-                </div>
                 <div class="stat-box present">
                     <div class="stat-number">${present}</div>
                     <div class="stat-label">Present</div>
@@ -923,6 +1031,10 @@
                 <div class="stat-box absent">
                     <div class="stat-number">${absent}</div>
                     <div class="stat-label">Absent</div>
+                </div>
+                <div class="stat-box total">
+                    <div class="stat-number">${total}</div>
+                    <div class="stat-label">Total</div>
                 </div>
                 <div class="stat-box overall">
                     <div class="stat-number">${overall}%</div>
