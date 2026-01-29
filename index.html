@@ -899,6 +899,50 @@
                 const arrayBuffer = await file.arrayBuffer();
                 const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
                 
+                // Process each page separately to avoid text joining issues
+                let allMatches = [];
+                
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    let pageText = content.items.map(item => item.str).join(' ');
+                    
+                    // Find table boundaries within this page
+                    const startMatch = pageText.search(/Sr\s*No\.?\s+Course\s*Name/i);
+                    
+                    // If start found, trim from there
+                    if (startMatch !== -1) {
+                        pageText = pageText.substring(startMatch);
+                    }
+                    
+                    // Now search for end in the trimmed text
+                    const endMatch = pageText.search(/P\s*-?\s*Present\s*:\s*A\s*-?\s*Absent/i);
+                    if (endMatch !== -1) {
+                        pageText = pageText.substring(0, endMatch);
+                    }
+                    
+                    // Universal pattern: [Sr No] [Subject - anything until date] [Date] [Time] [Time] [Status]
+                    const pattern = /(\d+)\s+(.+?)\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2}),\s*(\d{4})\s+(\d{1,2}:\d{2}:\d{2}\s*[AP]M)\s+(\d{1,2}:\d{2}:\d{2}\s*[AP]M)\s+(P|A|AG|L|NU)/gi;
+                    
+                    let m;
+                    while ((m = pattern.exec(pageText)) !== null) {
+                        let subj = m[2].trim();
+                        const status = m[8].toUpperCase();
+                        
+                        // Clean subject name - remove course codes
+                        subj = subj
+                            .replace(/-\d{4}-T\d-[A-Z].*$/i, '')  // BSc style: -7405-T1-A
+                            .replace(/[TPU]\d\s+[A-Z].*$/i, '')    // MBA style: T1 MBA...
+                            .replace(/\s+/g, ' ')
+                            .trim();
+                        
+                        if (subj.length > 2) {
+                            allMatches.push({ subject: subj, status: status });
+                        }
+                    }
+                }
+                
+                // Build full text for student info parsing
                 let fullText = '';
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
@@ -906,7 +950,7 @@
                     fullText += content.items.map(item => item.str).join(' ') + '\n';
                 }
 
-                displayResults(parseData(fullText));
+                displayResults(parseData(fullText, allMatches));
                 console.log("=== RAW PDF TEXT ===");
                 console.log(fullText);
                 console.log("=== END ===");
@@ -917,7 +961,7 @@
             }
         }
 
-        function parseData(text) {
+        function parseData(text, allMatches) {
             const info = {};
             
             // Text format is: VALUE Label (reversed)
@@ -952,19 +996,70 @@
             const durMatch = text.match(/From\s+([\d.]+)\s+to\s+([\d.]+)\s+Attendance\s+Report\s+Duration/);
             if (durMatch) info.duration = `${durMatch[1]} to ${durMatch[2]}`;
 
+            // Use pre-extracted matches
             const subjects = {};
-            const pattern = /([A-Za-z\s&]+)-\d+-T\d+-[A-Z]\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d+),\s+(\d{4})\s+[\d:]+\s+[AP]M\s+[\d:]+\s+[AP]M\s+(P|A|AG|L|NU)/gi;
             
-            let m;
-            while ((m = pattern.exec(text)) !== null) {
-                const subj = m[1].trim();
-                const status = m[5].toUpperCase();
-                if (status === 'NU') continue;
+            // Helper: calculate similarity between two strings (0 to 1)
+            function similarity(s1, s2) {
+                const longer = s1.length > s2.length ? s1 : s2;
+                const shorter = s1.length > s2.length ? s2 : s1;
+                if (longer.length === 0) return 1.0;
+                
+                // Check if one contains the other
+                const l1 = s1.toLowerCase().replace(/[^a-z]/g, '');
+                const l2 = s2.toLowerCase().replace(/[^a-z]/g, '');
+                if (l1.includes(l2) || l2.includes(l1)) return 0.95;
+                
+                // Levenshtein-based similarity
+                const costs = [];
+                for (let i = 0; i <= s1.length; i++) {
+                    let lastValue = i;
+                    for (let j = 0; j <= s2.length; j++) {
+                        if (i === 0) costs[j] = j;
+                        else if (j > 0) {
+                            let newValue = costs[j - 1];
+                            if (s1.charAt(i - 1) !== s2.charAt(j - 1))
+                                newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                            costs[j - 1] = lastValue;
+                            lastValue = newValue;
+                        }
+                    }
+                    if (i > 0) costs[s2.length] = lastValue;
+                }
+                return (longer.length - costs[s2.length]) / longer.length;
+            }
+            
+            // Find existing similar subject or return null
+            function findSimilar(newSubj) {
+                for (const existing of Object.keys(subjects)) {
+                    if (similarity(existing, newSubj) > 0.85) {
+                        return existing;
+                    }
+                }
+                return null;
+            }
+            
+            for (const match of allMatches) {
+                if (match.status === 'NU') continue;
+                
+                let subj = match.subject;
+                
+                // Check if similar subject already exists
+                const similar = findSimilar(subj);
+                if (similar) {
+                    // Use the longer (more complete) name
+                    if (subj.length > similar.length) {
+                        subjects[subj] = subjects[similar];
+                        delete subjects[similar];
+                    } else {
+                        subj = similar;
+                    }
+                }
                 
                 if (!subjects[subj]) subjects[subj] = { present: 0, absent: 0 };
                 
-                if (['P', 'AG', 'L'].includes(status)) subjects[subj].present++;
-                else if (status === 'A') subjects[subj].absent++;
+                if (['P', 'AG', 'L'].includes(match.status)) subjects[subj].present++;
+                else if (match.status === 'A') subjects[subj].absent++;
             }
 
             const subjectList = Object.entries(subjects).map(([name, data]) => {
