@@ -115,11 +115,50 @@
             box-shadow: var(--shadow-sm);
         }
 
+        .logo-content {
+            display: flex;
+            flex-direction: column;
+        }
+
         .logo-text {
             font-size: 1.8rem;
             font-weight: 900;
             color: var(--text-dark);
             letter-spacing: -1px;
+            line-height: 1;
+        }
+
+        .hero-tagline {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .rotating-word {
+            color: var(--accent);
+            display: inline-block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(10px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hero-tagline {
+                font-size: 1.5rem;
+            }
         }
 
         .theme-btn {
@@ -546,6 +585,21 @@
             font-weight: 800;
             font-size: 1rem;
             border-bottom: 3px solid var(--border-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .table-tip {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-medium);
+            background: var(--white);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-dark);
         }
 
         .table-scroll {
@@ -705,6 +759,81 @@
             overflow: hidden;
         }
 
+        /* Expandable missed dates */
+        .subject-row.has-missed {
+            cursor: pointer;
+        }
+
+        .subject-row.has-missed:hover {
+            background: var(--bg-secondary);
+        }
+
+        .expand-icon {
+            display: inline-block;
+            font-size: 0.7rem;
+            margin-right: 6px;
+            transition: transform 0.2s ease;
+            color: var(--text-medium);
+        }
+
+        .expand-icon-placeholder {
+            display: inline-block;
+            width: 16px;
+        }
+
+        .expand-icon.rotated {
+            transform: rotate(90deg);
+        }
+
+        .missed-row {
+            display: none;
+        }
+
+        .missed-row.show {
+            display: table-row;
+        }
+
+        .missed-dates {
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--text-medium);
+            margin: 4px 0;
+        }
+
+        .missed-label {
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-right: 8px;
+        }
+
+        /* Mobile missed dates */
+        .mobile-card.has-missed {
+            cursor: pointer;
+        }
+
+        .mobile-card .expand-icon {
+            margin-right: 4px;
+        }
+
+        .mobile-missed-dates {
+            display: none;
+            padding-top: 12px;
+            margin-top: 12px;
+            border-top: 1px solid var(--border-dark);
+            font-size: 0.8rem;
+            color: var(--text-medium);
+        }
+
+        .mobile-card.expanded .mobile-missed-dates {
+            display: block;
+        }
+
+        .mobile-card.expanded .expand-icon {
+            transform: rotate(90deg);
+        }
+
         /* Footer */
         .footer {
             text-align: center;
@@ -743,12 +872,19 @@
         <header>
             <div class="logo">
                 <div class="logo-box">X</div>
-                <span class="logo-text">AttendX</span>
+                <div class="logo-content">
+                    <span class="logo-text">AttendX</span>
+                </div>
             </div>
             <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">
                 <span id="themeIcon">☀</span>
             </button>
         </header>
+
+        <div class="hero-tagline">
+            <span>Attendance. Summarized.</span>
+            <span class="rotating-word" id="rotatingWord">Instantly.</span>
+        </div>
 
         <div class="instructions">
             <div class="instructions-title">
@@ -819,7 +955,10 @@
                 <div class="stats-grid" id="statsGrid"></div>
 
                 <div class="table-card">
-                    <div class="table-card-header">Subject Breakdown</div>
+                    <div class="table-card-header">
+                        Subject Breakdown
+                        <span class="table-tip">Click a row to see missed dates</span>
+                    </div>
                     <div class="table-scroll">
                         <table>
                             <thead>
@@ -845,6 +984,19 @@
     </div>
 
     <script>
+        // Rotating tagline words
+        const rotatingWords = ['Instantly.', 'Conveniently.', 'Effortlessly.', 'Automatically.', 'Seamlessly.', 'Quickly.', 'Easily.', 'Perfectly.', 'Simply.', 'Smoothly.'];
+        let wordIndex = 0;
+        
+        setInterval(() => {
+            wordIndex = (wordIndex + 1) % rotatingWords.length;
+            const el = document.getElementById('rotatingWord');
+            el.style.animation = 'none';
+            el.offsetHeight; // Trigger reflow
+            el.textContent = rotatingWords[wordIndex];
+            el.style.animation = 'fadeInUp 0.5s ease';
+        }, 2000);
+
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Theme
@@ -927,7 +1079,11 @@
                     let m;
                     while ((m = pattern.exec(pageText)) !== null) {
                         let subj = m[2].trim();
+                        const month = m[3];
+                        const day = m[4];
+                        const year = m[5];
                         const status = m[8].toUpperCase();
+                        const dateStr = `${month} ${day}, ${year}`;
                         
                         // Clean subject name - remove course codes
                         subj = subj
@@ -936,8 +1092,31 @@
                             .replace(/\s+/g, ' ')
                             .trim();
                         
-                        if (subj.length > 2) {
-                            allMatches.push({ subject: subj, status: status });
+                        // Skip garbage entries (page headers/footers)
+                        const isGarbage = 
+                            subj.includes('Sr N') ||
+                            subj.includes('Course N') ||
+                            subj.includes('Start Time') ||
+                            subj.includes('End Time') ||
+                            subj.includes('Attenda nce') ||
+                            subj.includes('Student N') ||
+                            subj.includes('Academic') ||
+                            subj.includes('Program N') ||
+                            subj.includes('SVKM') ||
+                            subj.includes('NMIMS') ||
+                            subj.includes('Mumbai') ||
+                            subj.includes('of 8') ||
+                            subj.includes('of 7') ||
+                            subj.includes('of 6') ||
+                            subj.includes('of 5') ||
+                            subj.includes('Page') ||
+                            subj.includes('BACHELOR') ||
+                            subj.includes('SCIE N CE') ||
+                            subj.includes('Roll N') ||
+                            subj.length > 60;
+                        
+                        if (!isGarbage && subj.length > 2) {
+                            allMatches.push({ subject: subj, status: status, date: dateStr });
                         }
                     }
                 }
@@ -1056,10 +1235,13 @@
                     }
                 }
                 
-                if (!subjects[subj]) subjects[subj] = { present: 0, absent: 0 };
+                if (!subjects[subj]) subjects[subj] = { present: 0, absent: 0, missedDates: [] };
                 
                 if (['P', 'AG', 'L'].includes(match.status)) subjects[subj].present++;
-                else if (match.status === 'A') subjects[subj].absent++;
+                else if (match.status === 'A') {
+                    subjects[subj].absent++;
+                    subjects[subj].missedDates.push(match.date);
+                }
             }
 
             const subjectList = Object.entries(subjects).map(([name, data]) => {
@@ -1069,7 +1251,8 @@
                     total,
                     present: data.present,
                     absent: data.absent,
-                    percentage: total > 0 ? parseFloat(((data.present / total) * 100).toFixed(1)) : 0
+                    percentage: total > 0 ? parseFloat(((data.present / total) * 100).toFixed(1)) : 0,
+                    missedDates: data.missedDates || []
                 };
             }).sort((a, b) => a.name.localeCompare(b.name));
 
@@ -1143,12 +1326,17 @@
             const mobileList = document.getElementById('mobileList');
             mobileList.innerHTML = '';
 
-            data.subjects.forEach(s => {
+            data.subjects.forEach((s, idx) => {
                 const cls = getClass(s.percentage);
+                const hasMissed = s.missedDates.length > 0;
+                const missedId = `missed-${idx}`;
                 
                 tbody.innerHTML += `
-                    <tr>
-                        <td class="subject-name">${s.name}</td>
+                    <tr class="subject-row ${hasMissed ? 'has-missed' : ''}" onclick="${hasMissed ? `toggleMissed('${missedId}')` : ''}">
+                        <td class="subject-name">
+                            ${hasMissed ? '<span class="expand-icon">▶</span>' : '<span class="expand-icon-placeholder"></span>'}
+                            ${s.name}
+                        </td>
                         <td class="mono">${s.total}</td>
                         <td class="mono">${s.present}</td>
                         <td class="mono">${s.absent}</td>
@@ -1161,12 +1349,25 @@
                             </div>
                         </td>
                     </tr>
+                    ${hasMissed ? `
+                    <tr class="missed-row" id="${missedId}">
+                        <td colspan="5">
+                            <div class="missed-dates">
+                                <span class="missed-label">Missed:</span>
+                                ${s.missedDates.join(' • ')}
+                            </div>
+                        </td>
+                    </tr>
+                    ` : ''}
                 `;
 
                 mobileList.innerHTML += `
-                    <div class="mobile-card">
+                    <div class="mobile-card ${hasMissed ? 'has-missed' : ''}" onclick="${hasMissed ? `toggleMissedMobile(this)` : ''}">
                         <div class="mobile-card-top">
-                            <span class="mobile-card-name">${s.name}</span>
+                            <span class="mobile-card-name">
+                                ${hasMissed ? '<span class="expand-icon">▶</span>' : ''}
+                                ${s.name}
+                            </span>
                             <span class="mobile-card-percent ${cls}">${s.percentage}%</span>
                         </div>
                         <div class="mobile-card-stats">
@@ -1186,20 +1387,41 @@
                         <div class="mobile-card-bar">
                             <div class="percent-fill ${cls}" style="width:${s.percentage}%"></div>
                         </div>
+                        ${hasMissed ? `
+                        <div class="mobile-missed-dates">
+                            <span class="missed-label">Missed:</span>
+                            ${s.missedDates.join(' • ')}
+                        </div>
+                        ` : ''}
                     </div>
                 `;
             });
 
             uploadBox.style.display = 'none';
+            document.querySelector('.instructions').style.display = 'none';
             results.classList.add('active');
         }
 
         function resetAll() {
             uploadBox.style.display = 'block';
             document.querySelector('.upload-content').style.display = 'block';
+            document.querySelector('.instructions').style.display = 'block';
             loader.classList.remove('active');
             results.classList.remove('active');
             fileInput.value = '';
+        }
+
+        function toggleMissed(id) {
+            const row = document.getElementById(id);
+            const prevRow = row.previousElementSibling;
+            const icon = prevRow.querySelector('.expand-icon');
+            
+            row.classList.toggle('show');
+            icon.classList.toggle('rotated');
+        }
+
+        function toggleMissedMobile(card) {
+            card.classList.toggle('expanded');
         }
 
         async function saveAsImage() {
