@@ -340,6 +340,57 @@
             border-radius: 24px;
         }
 
+        /* Student Card */
+        .student-card {
+            background: var(--card-lavender);
+            border: 3px solid var(--border-dark);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .student-card-title {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            opacity: 0.7;
+        }
+
+        .student-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .student-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .student-item {
+            background: var(--white);
+            border: 2px solid var(--border-dark);
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .student-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-medium);
+            margin-bottom: 4px;
+        }
+
+        .student-value {
+            font-weight: 800;
+            font-size: 0.95rem;
+        }
+
         /* Stats Grid */
         .stats-grid {
             display: grid;
@@ -665,6 +716,11 @@
             </div>
 
             <div id="exportContent">
+                <div class="student-card">
+                    <div class="student-card-title">Student Details</div>
+                    <div class="student-grid" id="studentGrid"></div>
+                </div>
+
                 <div class="stats-grid" id="statsGrid"></div>
 
                 <div class="table-card">
@@ -739,6 +795,9 @@
                 }
 
                 displayResults(parseData(fullText));
+                console.log("=== RAW PDF TEXT ===");
+                console.log(fullText);
+                console.log("=== END ===");
             } catch (err) {
                 console.error(err);
                 alert('Error reading PDF. Make sure it\'s a valid NMIMS attendance report.');
@@ -749,28 +808,36 @@
         function parseData(text) {
             const info = {};
             
-            // Student Name - look for pattern before "Student Number"
-            const nameMatch = text.match(/Student\s+Name\s+([A-Z][A-Z\s]+?)(?=\s+Student\s+Number)/i);
-            if (nameMatch) info.name = nameMatch[1].trim();
+            // Text format is: VALUE Label (reversed)
+            // e.g., "ANVESHA GOYAL Student Name 74052300385 Student Number"
             
-            // Student Number (SAP Number)
-            const numMatch = text.match(/Student\s+Number\s+(\d{11,14})/i);
+            // Name comes before "Student Name" - but may have junk before it
+            const nameMatch = text.match(/([A-Z][A-Z]+\s+[A-Z]+)\s+Student\s+Name/);
+            if (nameMatch) {
+                let name = nameMatch[1].trim();
+                // Remove common junk prefixes
+                name = name.replace(/^.*?(NMIMS|SVKM|Mumbai|School|Commerce)\s*/gi, '');
+                info.name = name.trim();
+            }
+            
+            // SAP Number comes before "Student Number"
+            const numMatch = text.match(/(\d{11,14})\s+Student\s+Number/);
             if (numMatch) info.sapNumber = numMatch[1].trim();
             
-            // Roll No
-            const rollMatch = text.match(/Roll\s+No\.\s+([A-Z]\d{2,3})/i);
+            // Roll No comes before "Roll No."
+            const rollMatch = text.match(/([A-Z]\d{2,3})\s+Roll\s+No/);
             if (rollMatch) info.roll = rollMatch[1].trim();
             
-            // Program Name
-            const progMatch = text.match(/Program\s+Name\s+([A-Z][A-Z\s()]+?)(?=\s+Attendance)/i);
+            // Program comes before "Program Name"
+            const progMatch = text.match(/([A-Z][A-Z\s()]+?)\s+Program\s+Name/);
             if (progMatch) info.program = progMatch[1].trim();
 
-            // Academic Year & Semester
-            const yearMatch = text.match(/Academic\s+Year.*?(\d{4}-\d{4}),?\s*(Semester\s*[IVX]+)/i);
-            if (yearMatch) info.year = `${yearMatch[1]}, ${yearMatch[2]}`;
+            // Academic Year before "Academic Year"
+            const yearMatch = text.match(/(\d{4}-\d{4},?\s*Semester\s*[IVX]+)\s+Academic\s+Year/);
+            if (yearMatch) info.year = yearMatch[1].trim();
 
-            // Duration
-            const durMatch = text.match(/Duration\s*:\s*From\s+([\d.]+)\s+to\s+([\d.]+)/i);
+            // Duration - "From X to Y" before "Attendance Report Duration"
+            const durMatch = text.match(/From\s+([\d.]+)\s+to\s+([\d.]+)\s+Attendance\s+Report\s+Duration/);
             if (durMatch) info.duration = `${durMatch[1]} to ${durMatch[2]}`;
 
             const subjects = {};
@@ -818,6 +885,26 @@
         }
 
         function displayResults(data) {
+            // Student info
+            const grid = document.getElementById('studentGrid');
+            grid.innerHTML = '';
+            
+            const fields = [
+                ['name', 'Name'], ['sapNumber', 'SAP Number'], ['roll', 'Roll No'],
+                ['program', 'Program'], ['year', 'Academic Year'], ['duration', 'Duration']
+            ];
+
+            fields.forEach(([key, label]) => {
+                if (data.info[key]) {
+                    grid.innerHTML += `
+                        <div class="student-item">
+                            <div class="student-label">${label}</div>
+                            <div class="student-value">${data.info[key]}</div>
+                        </div>
+                    `;
+                }
+            });
+
             // Stats
             const total = data.subjects.reduce((s, x) => s + x.total, 0);
             const present = data.subjects.reduce((s, x) => s + x.present, 0);
