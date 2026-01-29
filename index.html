@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AttendX — NMIMS Attendance Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #050508;
+            --bg-card: #0c0c12;
+            --bg-card-hover: #12121c;
+            --accent: #818cf8;
+            --accent-bright: #a5b4fc;
+            --accent-glow: rgba(129, 140, 248, 0.25);
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #1e1e2e;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(129, 140, 248, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(129, 140, 248, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: -30%;
+            right: -20%;
+            width: 70%;
+            height: 70%;
+            background: radial-gradient(circle, rgba(129, 140, 248, 0.12) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-glow-2 {
+            position: fixed;
+            bottom: -30%;
+            left: -20%;
+            width: 60%;
+            height: 60%;
+            background: radial-gradient(circle, rgba(52, 211, 153, 0.08) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+
+        .logo-icon {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--accent), #6366f1);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            box-shadow: 0 0 40px var(--accent-glow);
+            font-weight: 700;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-bright));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .tagline {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        /* Instructions */
+        .instructions {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+
+        .instructions h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent-bright);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .step-num {
+            min-width: 24px;
+            height: 24px;
+            background: rgba(129, 140, 248, 0.15);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent-bright);
+        }
+
+        .step a {
+            color: var(--accent-bright);
+            text-decoration: none;
+        }
+
+        .step a:hover {
+            text-decoration: underline;
+        }
+
+        .step strong {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Upload Zone */
+        .upload-zone {
+            background: var(--bg-card);
+            border: 2px dashed var(--border);
+            border-radius: 20px;
+            padding: 50px 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--accent);
+            background: var(--bg-card-hover);
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--accent);
+            background: rgba(129, 140, 248, 0.08);
+            transform: scale(1.01);
+        }
+
+        .upload-zone.processing {
+            pointer-events: none;
+        }
+
+        .upload-icon {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, rgba(129, 140, 248, 0.15), rgba(99, 102, 241, 0.15));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
+        }
+
+        .upload-zone h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .upload-zone p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .upload-zone input {
+            display: none;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--accent), #6366f1);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 24px var(--accent-glow);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 32px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            box-shadow: none;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--text-primary);
+            box-shadow: none;
+            transform: none;
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, var(--success), #10b981);
+            box-shadow: 0 4px 24px rgba(52, 211, 153, 0.25);
+        }
+
+        .btn-export:hover {
+            box-shadow: 0 6px 32px rgba(52, 211, 153, 0.3);
+        }
+
+        /* Loader */
+        .loader {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .loader.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Results */
+        .results {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Results Header */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .results-header h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .results-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Student Info */
+        .student-info {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .student-info h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .info-value {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        /* Stats Cards */
+        .overall-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .overall-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(129, 140, 248, 0.3);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-value.success { color: var(--success); }
+        .stat-value.danger { color: var(--danger); }
+        .stat-value.accent { color: var(--accent-bright); }
+        .stat-value.warning { color: var(--warning); }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* Table */
+        .table-container {
+            background: var(--bg-card);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .table-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(129, 140, 248, 0.08);
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s ease;
+        }
+
+        tr:last-child {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .subject-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .percentage-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bar-bg {
+            flex: 1;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+            min-width: 60px;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+
+        .bar-fill.success { background: var(--success); }
+        .bar-fill.warning { background: var(--warning); }
+        .bar-fill.danger { background: var(--danger); }
+
+        .percentage-value {
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            min-width: 48px;
+            text-align: right;
+        }
+
+        .percentage-value.success { color: var(--success); }
+        .percentage-value.warning { color: var(--warning); }
+        .percentage-value.danger { color: var(--danger); }
+
+        /* Mobile Cards View */
+        .mobile-cards {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .table-scroll {
+                display: none;
+            }
+
+            .mobile-cards {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                padding: 16px;
+            }
+
+            .subject-card {
+                background: var(--bg-card-hover);
+                border-radius: 12px;
+                padding: 16px;
+                border: 1px solid var(--border);
+            }
+
+            .subject-card-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 12px;
+            }
+
+            .subject-card-name {
+                font-weight: 600;
+                font-size: 0.95rem;
+                flex: 1;
+                padding-right: 10px;
+            }
+
+            .subject-card-percent {
+                font-family: 'JetBrains Mono', monospace;
+                font-weight: 700;
+                font-size: 1.1rem;
+            }
+
+            .subject-card-stats {
+                display: flex;
+                gap: 16px;
+                margin-bottom: 10px;
+            }
+
+            .subject-card-stat {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .subject-card-stat-label {
+                font-size: 0.7rem;
+                color: var(--text-muted);
+                text-transform: uppercase;
+            }
+
+            .subject-card-stat-value {
+                font-family: 'JetBrains Mono', monospace;
+                font-weight: 600;
+            }
+
+            .subject-card-bar {
+                height: 6px;
+                background: var(--border);
+                border-radius: 3px;
+                overflow: hidden;
+            }
+
+            .subject-card-bar-fill {
+                height: 100%;
+                border-radius: 3px;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* PDF Export Styles */
+        .pdf-export-container {
+            background: #0a0a0f !important;
+            padding: 30px;
+        }
+
+        @media print {
+            body { background: #0a0a0f; }
+            .upload-zone, .instructions, .results-actions, .footer { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+    <div class="bg-glow-2"></div>
+    
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">X</div>
+                <span class="logo-text">AttendX</span>
+            </div>
+            <p class="tagline">NMIMS Attendance Calculator</p>
+        </header>
+
+        <div class="instructions">
+            <h3>📋 How to use</h3>
+            <div class="steps">
+                <div class="step">
+                    <span class="step-num">1</span>
+                    <span>Go to <a href="https://svkm.nmims.edu:8001/sap/bc/ui5_ui5/ui2/ushell/shells/abap/FioriLaunchpad.html" target="_blank">NMIMS SAP Portal</a> and login with your credentials</span>
+                </div>
+                <div class="step">
+                    <span class="step-num">2</span>
+                    <span>Open <strong>Student Attendance Report</strong> tile → Select date range → Click <strong>Get Report</strong></span>
+                </div>
+                <div class="step">
+                    <span class="step-num">3</span>
+                    <span>Click the <strong>Download PDF</strong> button (use Chrome for best results)</span>
+                </div>
+                <div class="step">
+                    <span class="step-num">4</span>
+                    <span>Upload that PDF here and get your attendance breakdown instantly!</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="upload-zone" id="uploadZone">
+            <div class="upload-content">
+                <div class="upload-icon">📄</div>
+                <h2>Drop your PDF here</h2>
+                <p>or click to browse files</p>
+                <button class="btn">
+                    <span>📁</span> Select PDF
+                </button>
+            </div>
+            <div class="loader" id="loader">
+                <div class="spinner"></div>
+                <p>Analyzing your attendance...</p>
+            </div>
+            <input type="file" id="fileInput" accept=".pdf">
+        </div>
+
+        <div class="results" id="results">
+            <div class="results-header">
+                <h2>📊 Your Attendance Report</h2>
+                <div class="results-actions">
+                    <button class="btn btn-export" onclick="exportPDF()">
+                        <span>📥</span> Export PDF
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetCalculator()">
+                        ↻ Upload New
+                    </button>
+                </div>
+            </div>
+
+            <div id="exportContent">
+                <div class="student-info" id="studentInfo">
+                    <h3>Student Details</h3>
+                    <div class="info-grid" id="infoGrid"></div>
+                </div>
+
+                <div class="overall-stats" id="overallStats"></div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Subject-wise Breakdown</h3>
+                    </div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Total</th>
+                                    <th>Present</th>
+                                    <th>Absent</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="mobile-cards" id="mobileCards"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Made for NMIMS students ✨</p>
+        </div>
+    </div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const loader = document.getElementById('loader');
+        const results = document.getElementById('results');
+
+        // Drag and drop handlers
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type === 'application/pdf') {
+                processFile(file);
+            }
+        });
+
+        uploadZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                processFile(file);
+            }
+        });
+
+        async function processFile(file) {
+            uploadZone.classList.add('processing');
+            document.querySelector('.upload-content').style.display = 'none';
+            loader.classList.add('active');
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                
+                let fullText = '';
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    fullText += pageText + '\n';
+                }
+
+                const data = parseAttendanceData(fullText);
+                displayResults(data);
+            } catch (error) {
+                console.error('Error processing PDF:', error);
+                alert('Error processing PDF. Please make sure it\'s a valid NMIMS attendance report.');
+                resetCalculator();
+            }
+        }
+
+        function parseAttendanceData(text) {
+            // Extract student info
+            const studentInfo = {};
+            
+            const nameMatch = text.match(/Student Name\s+([A-Z\s]+?)(?=Student Number)/i);
+            if (nameMatch) studentInfo.name = nameMatch[1].trim();
+            
+            const studentNumMatch = text.match(/Student Number\s+(\d+)/i);
+            if (studentNumMatch) studentInfo.studentNumber = studentNumMatch[1].trim();
+            
+            const rollMatch = text.match(/Roll No\.\s+([A-Z0-9]+)/i);
+            if (rollMatch) studentInfo.roll = rollMatch[1].trim();
+            
+            const programMatch = text.match(/Program Name\s+([A-Z\s()]+?)(?=Attendance)/i);
+            if (programMatch) studentInfo.program = programMatch[1].trim();
+
+            const yearMatch = text.match(/Academic Year.*?(\d{4}-\d{4},\s*Semester\s*[IVX]+)/i);
+            if (yearMatch) studentInfo.academicYear = yearMatch[1].trim();
+
+            const durationMatch = text.match(/Duration\s*:\s*From\s+([\d.]+)\s+to\s+([\d.]+)/i);
+            if (durationMatch) studentInfo.duration = `${durationMatch[1]} to ${durationMatch[2]}`;
+
+            // Parse attendance records
+            const subjects = {};
+            
+            // Pattern to match attendance entries
+            const entryPattern = /([A-Za-z\s&]+)-7405-T1-B\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d+),\s+(\d{4})\s+[\d:]+\s+[AP]M\s+[\d:]+\s+[AP]M\s+(P|A|AG|L|NU)/gi;
+            
+            let match;
+            while ((match = entryPattern.exec(text)) !== null) {
+                const subjectName = match[1].trim();
+                const status = match[5].toUpperCase();
+                
+                // Skip NU entries
+                if (status === 'NU') continue;
+                
+                if (!subjects[subjectName]) {
+                    subjects[subjectName] = { present: 0, absent: 0 };
+                }
+                
+                if (status === 'P' || status === 'AG' || status === 'L') {
+                    subjects[subjectName].present++;
+                } else if (status === 'A') {
+                    subjects[subjectName].absent++;
+                }
+            }
+
+            // Convert to array and calculate totals
+            const subjectData = Object.entries(subjects).map(([name, data]) => {
+                const total = data.present + data.absent;
+                const percentage = total > 0 ? ((data.present / total) * 100).toFixed(1) : 0;
+                return {
+                    name: formatSubjectName(name),
+                    total,
+                    present: data.present,
+                    absent: data.absent,
+                    percentage: parseFloat(percentage)
+                };
+            });
+
+            // Sort by subject name
+            subjectData.sort((a, b) => a.name.localeCompare(b.name));
+
+            return { studentInfo, subjects: subjectData };
+        }
+
+        function formatSubjectName(name) {
+            const nameMap = {
+                'Mktg of Financial Services': 'Marketing of Financial Services',
+                'Direct and Indirect Tax': 'Direct and Indirect Tax',
+                'Fincil Reptg Stds and Anlys II': 'Financial Reporting Stds & Analysis II',
+                'Finacil Planning & Welth Mgmt': 'Financial Planning & Wealth Mgmt',
+                'Applied Econometrics': 'Applied Econometrics',
+                'Technical Analysis': 'Technical Analysis'
+            };
+            return nameMap[name] || name;
+        }
+
+        function getPercentageClass(percentage) {
+            if (percentage >= 80) return 'success';
+            if (percentage >= 70) return 'warning';
+            return 'danger';
+        }
+
+        function displayResults(data) {
+            // Student info
+            const infoGrid = document.getElementById('infoGrid');
+            infoGrid.innerHTML = '';
+            
+            if (data.studentInfo.name) {
+                infoGrid.innerHTML += `<div class="info-item"><span class="info-label">Name</span><span class="info-value">${data.studentInfo.name}</span></div>`;
+            }
+            if (data.studentInfo.studentNumber) {
+                infoGrid.innerHTML += `<div class="info-item"><span class="info-label">SAP Number</span><span class="info-value">${data.studentInfo.studentNumber}</span></div>`;
+            }
+            if (data.studentInfo.roll) {
+                infoGrid.innerHTML += `<div class="info-item"><span class="info-label">Roll No</span><span class="info-value">${data.studentInfo.roll}</span></div>`;
+            }
+            if (data.studentInfo.program) {
+                infoGrid.innerHTML += `<div class="info-item"><span class="info-label">Program</span><span class="info-value">${data.studentInfo.program}</span></div>`;
+            }
+            if (data.studentInfo.academicYear) {
+                infoGrid.innerHTML += `<div class="info-item"><span class="info-label">Academic Year</span><span class="info-value">${data.studentInfo.academicYear}</span></div>`;
+            }
+            if (data.studentInfo.duration) {
+                infoGrid.innerHTML += `<div class="info-item"><span class="info-label">Report Duration</span><span class="info-value">${data.studentInfo.duration}</span></div>`;
+            }
+
+            // Calculate overall stats
+            const totalLectures = data.subjects.reduce((sum, s) => sum + s.total, 0);
+            const totalPresent = data.subjects.reduce((sum, s) => sum + s.present, 0);
+            const totalAbsent = data.subjects.reduce((sum, s) => sum + s.absent, 0);
+            const overallPercentage = totalLectures > 0 ? ((totalPresent / totalLectures) * 100).toFixed(1) : 0;
+
+            const statsContainer = document.getElementById('overallStats');
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value accent">${totalLectures}</div>
+                    <div class="stat-label">Total Lectures</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value success">${totalPresent}</div>
+                    <div class="stat-label">Present</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value danger">${totalAbsent}</div>
+                    <div class="stat-label">Absent</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value ${getPercentageClass(overallPercentage)}">${overallPercentage}%</div>
+                    <div class="stat-label">Overall</div>
+                </div>
+            `;
+
+            // Desktop table
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+
+            // Mobile cards
+            const mobileCards = document.getElementById('mobileCards');
+            mobileCards.innerHTML = '';
+
+            data.subjects.forEach(subject => {
+                const percentClass = getPercentageClass(subject.percentage);
+                
+                // Desktop row
+                tableBody.innerHTML += `
+                    <tr>
+                        <td class="subject-name">${subject.name}</td>
+                        <td class="mono">${subject.total}</td>
+                        <td class="mono">${subject.present}</td>
+                        <td class="mono">${subject.absent}</td>
+                        <td>
+                            <div class="percentage-cell">
+                                <div class="bar-bg">
+                                    <div class="bar-fill ${percentClass}" style="width: ${subject.percentage}%"></div>
+                                </div>
+                                <span class="percentage-value ${percentClass}">${subject.percentage}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+
+                // Mobile card
+                mobileCards.innerHTML += `
+                    <div class="subject-card">
+                        <div class="subject-card-header">
+                            <span class="subject-card-name">${subject.name}</span>
+                            <span class="subject-card-percent ${percentClass}">${subject.percentage}%</span>
+                        </div>
+                        <div class="subject-card-stats">
+                            <div class="subject-card-stat">
+                                <span class="subject-card-stat-label">Total</span>
+                                <span class="subject-card-stat-value">${subject.total}</span>
+                            </div>
+                            <div class="subject-card-stat">
+                                <span class="subject-card-stat-label">Present</span>
+                                <span class="subject-card-stat-value" style="color: var(--success)">${subject.present}</span>
+                            </div>
+                            <div class="subject-card-stat">
+                                <span class="subject-card-stat-label">Absent</span>
+                                <span class="subject-card-stat-value" style="color: var(--danger)">${subject.absent}</span>
+                            </div>
+                        </div>
+                        <div class="subject-card-bar">
+                            <div class="subject-card-bar-fill ${percentClass}" style="width: ${subject.percentage}%; background: var(--${percentClass})"></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            uploadZone.style.display = 'none';
+            results.classList.add('active');
+        }
+
+        function resetCalculator() {
+            uploadZone.style.display = 'block';
+            uploadZone.classList.remove('processing');
+            document.querySelector('.upload-content').style.display = 'block';
+            loader.classList.remove('active');
+            results.classList.remove('active');
+            fileInput.value = '';
+        }
+
+        function exportPDF() {
+            const element = document.getElementById('exportContent');
+            const studentName = document.querySelector('.info-value')?.textContent || 'Attendance';
+            
+            const opt = {
+                margin: [10, 10, 10, 10],
+                filename: `AttendX_${studentName.replace(/\s+/g, '_')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2,
+                    backgroundColor: '#0a0a0f',
+                    useCORS: true
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait' 
+                }
+            };
+
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+</html>
