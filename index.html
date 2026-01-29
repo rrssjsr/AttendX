@@ -841,7 +841,7 @@
             if (durMatch) info.duration = `${durMatch[1]} to ${durMatch[2]}`;
 
             const subjects = {};
-            const pattern = /([A-Za-z\s&]+)-7405-T1-B\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d+),\s+(\d{4})\s+[\d:]+\s+[AP]M\s+[\d:]+\s+[AP]M\s+(P|A|AG|L|NU)/gi;
+            const pattern = /([A-Za-z\s&]+)-\d+-T\d+-[A-Z]\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d+),\s+(\d{4})\s+[\d:]+\s+[AP]M\s+[\d:]+\s+[AP]M\s+(P|A|AG|L|NU)/gi;
             
             let m;
             while ((m = pattern.exec(text)) !== null) {
