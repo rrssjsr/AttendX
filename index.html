@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AttendX — NMIMS Attendance Calculator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -15,278 +15,251 @@
         }
 
         :root {
-            --bg-dark: #050508;
-            --bg-card: #0c0c12;
-            --bg-card-hover: #12121c;
-            --accent: #818cf8;
-            --accent-bright: #a5b4fc;
-            --accent-glow: rgba(129, 140, 248, 0.25);
-            --success: #34d399;
-            --warning: #fbbf24;
-            --danger: #f87171;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border: #1e1e2e;
+            --bg-main: #f5f0ff;
+            --bg-secondary: #fef6f0;
+            --card-pink: #ffb6c1;
+            --card-yellow: #fff176;
+            --card-mint: #a8f0d4;
+            --card-lavender: #e0d4ff;
+            --card-peach: #ffd4b8;
+            --card-sky: #b8e4ff;
+            --card-cream: #fff8e7;
+            --accent: #7c3aed;
+            --accent-dark: #5b21b6;
+            --text-dark: #1a1a2e;
+            --text-medium: #4a4a6a;
+            --border-dark: #1a1a2e;
+            --white: #ffffff;
+            --shadow: 4px 4px 0px #1a1a2e;
+            --shadow-sm: 2px 2px 0px #1a1a2e;
         }
 
         body {
             font-family: 'Outfit', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
+            background: var(--bg-main);
+            color: var(--text-dark);
             min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .bg-grid {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(129, 140, 248, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(129, 140, 248, 0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .bg-glow {
-            position: fixed;
-            top: -30%;
-            right: -20%;
-            width: 70%;
-            height: 70%;
-            background: radial-gradient(circle, rgba(129, 140, 248, 0.12) 0%, transparent 60%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .bg-glow-2 {
-            position: fixed;
-            bottom: -30%;
-            left: -20%;
-            width: 60%;
-            height: 60%;
-            background: radial-gradient(circle, rgba(52, 211, 153, 0.08) 0%, transparent 60%);
-            pointer-events: none;
-            z-index: 0;
+            transition: all 0.3s ease;
         }
 
         .container {
-            position: relative;
-            z-index: 1;
-            max-width: 900px;
+            max-width: 880px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 32px 20px;
         }
 
         /* Header */
         header {
-            text-align: center;
-            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
         }
 
         .logo {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            gap: 14px;
-            margin-bottom: 12px;
+            gap: 12px;
         }
 
-        .logo-icon {
-            width: 52px;
-            height: 52px;
-            background: linear-gradient(135deg, var(--accent), #6366f1);
-            border-radius: 14px;
+        .logo-box {
+            width: 48px;
+            height: 48px;
+            background: var(--card-yellow);
+            border: 3px solid var(--border-dark);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px;
-            box-shadow: 0 0 40px var(--accent-glow);
-            font-weight: 700;
-            color: white;
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--text-dark);
+            box-shadow: var(--shadow-sm);
         }
 
         .logo-text {
-            font-size: 2.2rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--text-primary), var(--accent-bright));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.5px;
-        }
-
-        .tagline {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            font-weight: 400;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--text-dark);
+            letter-spacing: -1px;
         }
 
         /* Instructions */
         .instructions {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
+            background: var(--card-cream);
+            border: 3px solid var(--border-dark);
+            border-radius: 20px;
             padding: 24px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
         }
 
-        .instructions h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--accent-bright);
+        .instructions-title {
+            font-size: 1.1rem;
+            font-weight: 800;
             margin-bottom: 16px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
-        .steps {
+        .instructions-title span {
+            background: var(--card-sky);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 2px solid var(--border-dark);
+            font-size: 0.8rem;
+        }
+
+        .steps-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
-        .step {
+        .step-item {
             display: flex;
             align-items: flex-start;
             gap: 12px;
-            color: var(--text-secondary);
             font-size: 0.95rem;
+            color: var(--text-medium);
             line-height: 1.5;
         }
 
         .step-num {
-            min-width: 24px;
-            height: 24px;
-            background: rgba(129, 140, 248, 0.15);
-            border-radius: 6px;
+            min-width: 28px;
+            height: 28px;
+            background: var(--card-pink);
+            border: 2px solid var(--border-dark);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--accent-bright);
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: var(--text-dark);
         }
 
-        .step a {
-            color: var(--accent-bright);
+        .step-item a {
+            color: var(--accent);
+            font-weight: 700;
             text-decoration: none;
         }
 
-        .step a:hover {
+        .step-item a:hover {
             text-decoration: underline;
         }
 
-        .step strong {
-            color: var(--text-primary);
-            font-weight: 500;
+        .portal-alert {
+            margin-top: 16px;
+            background: var(--card-peach);
+            border: 2px solid var(--border-dark);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        /* Upload Zone */
-        .upload-zone {
-            background: var(--bg-card);
-            border: 2px dashed var(--border);
-            border-radius: 20px;
-            padding: 50px 40px;
+        .alert-badge {
+            background: var(--text-dark);
+            color: var(--white);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        /* Upload */
+        .upload-box {
+            background: var(--card-mint);
+            border: 3px solid var(--border-dark);
+            border-radius: 24px;
+            padding: 48px 32px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            transition: all 0.2s ease;
             position: relative;
-            overflow: hidden;
         }
 
-        .upload-zone:hover {
-            border-color: var(--accent);
-            background: var(--bg-card-hover);
+        .upload-box:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 7px 7px 0px var(--border-dark);
         }
 
-        .upload-zone.dragover {
-            border-color: var(--accent);
-            background: rgba(129, 140, 248, 0.08);
-            transform: scale(1.01);
+        .upload-box.dragover {
+            background: var(--card-yellow);
+            transform: scale(1.02);
         }
 
-        .upload-zone.processing {
-            pointer-events: none;
-        }
-
-        .upload-icon {
-            width: 72px;
-            height: 72px;
-            background: linear-gradient(135deg, rgba(129, 140, 248, 0.15), rgba(99, 102, 241, 0.15));
-            border-radius: 50%;
+        .upload-graphic {
+            width: 100px;
+            height: 100px;
+            background: var(--white);
+            border: 3px solid var(--border-dark);
+            border-radius: 20px;
+            margin: 0 auto 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 32px;
+            box-shadow: var(--shadow-sm);
         }
 
-        .upload-zone h2 {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 6px;
+        .upload-graphic svg {
+            width: 50px;
+            height: 50px;
+            stroke: var(--text-dark);
         }
 
-        .upload-zone p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
+        .upload-box h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
         }
 
-        .upload-zone input {
+        .upload-box p {
+            color: var(--text-medium);
+            font-weight: 500;
+        }
+
+        .upload-box input {
             display: none;
         }
 
-        .btn {
+        .btn-main {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: linear-gradient(135deg, var(--accent), #6366f1);
-            color: white;
-            border: none;
+            background: var(--text-dark);
+            color: var(--white);
+            border: 3px solid var(--border-dark);
             padding: 14px 28px;
-            border-radius: 12px;
+            border-radius: 14px;
             font-family: inherit;
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             margin-top: 20px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 24px var(--accent-glow);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 32px var(--accent-glow);
+        .btn-main:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0px var(--card-pink);
         }
 
         .btn-secondary {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-            box-shadow: none;
-            padding: 10px 20px;
-            font-size: 0.9rem;
+            background: var(--white);
+            color: var(--text-dark);
         }
 
-        .btn-secondary:hover {
-            border-color: var(--accent);
-            color: var(--text-primary);
-            box-shadow: none;
-            transform: none;
-        }
-
-        .btn-export {
-            background: linear-gradient(135deg, var(--success), #10b981);
-            box-shadow: 0 4px 24px rgba(52, 211, 153, 0.25);
-        }
-
-        .btn-export:hover {
-            box-shadow: 0 6px 32px rgba(52, 211, 153, 0.3);
+        .btn-save {
+            background: var(--card-pink);
+            color: var(--text-dark);
         }
 
         /* Loader */
@@ -301,167 +274,139 @@
             display: flex;
         }
 
-        .spinner {
-            width: 44px;
-            height: 44px;
-            border: 3px solid var(--border);
-            border-top-color: var(--accent);
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-dark);
+            border-top-color: var(--card-pink);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
+        .loader p {
+            font-weight: 700;
+        }
+
         /* Results */
         .results {
             display: none;
-            margin-top: 30px;
-            animation: fadeIn 0.5s ease;
+            margin-top: 24px;
         }
 
         .results.active {
             display: block;
+            animation: popUp 0.4s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes popUp {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* Results Header */
-        .results-header {
+        .results-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
             gap: 12px;
         }
 
-        .results-header h2 {
+        .results-title {
             font-size: 1.3rem;
-            font-weight: 700;
+            font-weight: 900;
         }
 
-        .results-actions {
+        .results-btns {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
 
-        /* Student Info */
-        .student-info {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
+        .results-btns .btn-main {
+            margin-top: 0;
+            padding: 10px 18px;
+            font-size: 0.9rem;
         }
 
-        .student-info h3 {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 16px;
+        /* Export Content */
+        #exportContent {
+            background: var(--bg-main);
+            padding: 4px;
+            border-radius: 24px;
         }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-        }
-
-        .info-item {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .info-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .info-value {
-            font-weight: 600;
-            font-size: 1rem;
-            color: var(--text-primary);
-        }
-
-        /* Stats Cards */
-        .overall-stats {
+        /* Stats Grid */
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         @media (max-width: 600px) {
-            .overall-stats {
+            .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
 
-        .stat-card {
-            background: var(--bg-card);
-            border-radius: 14px;
-            padding: 20px;
+        .stat-box {
+            border: 3px solid var(--border-dark);
+            border-radius: 16px;
+            padding: 20px 16px;
             text-align: center;
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            transition: all 0.2s ease;
         }
 
-        .stat-card:hover {
-            transform: translateY(-2px);
-            border-color: rgba(129, 140, 248, 0.3);
+        .stat-box:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--border-dark);
         }
 
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            font-family: 'JetBrains Mono', monospace;
-        }
+        .stat-box.total { background: var(--card-sky); }
+        .stat-box.present { background: var(--card-mint); }
+        .stat-box.absent { background: var(--card-pink); }
+        .stat-box.overall { background: var(--card-yellow); }
 
-        .stat-value.success { color: var(--success); }
-        .stat-value.danger { color: var(--danger); }
-        .stat-value.accent { color: var(--accent-bright); }
-        .stat-value.warning { color: var(--warning); }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 900;
+            font-family: 'Space Mono', monospace;
+            color: var(--text-dark);
+        }
 
         .stat-label {
-            color: var(--text-muted);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            opacity: 0.8;
             margin-top: 4px;
-            font-weight: 500;
         }
 
-        /* Table */
-        .table-container {
-            background: var(--bg-card);
-            border-radius: 16px;
+        /* Table Card */
+        .table-card {
+            background: var(--white);
+            border: 3px solid var(--border-dark);
+            border-radius: 20px;
             overflow: hidden;
-            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
         }
 
-        .table-header {
-            padding: 18px 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .table-header h3 {
+        .table-card-header {
+            background: var(--card-peach);
+            padding: 16px 20px;
+            font-weight: 800;
             font-size: 1rem;
-            font-weight: 600;
+            border-bottom: 3px solid var(--border-dark);
         }
 
         .table-scroll {
             overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
         }
 
         table {
@@ -476,257 +421,254 @@
         }
 
         th {
-            background: rgba(129, 140, 248, 0.08);
-            font-weight: 600;
-            color: var(--text-muted);
-            font-size: 0.75rem;
+            background: var(--bg-secondary);
+            font-weight: 800;
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            white-space: nowrap;
+            border-bottom: 2px solid var(--border-dark);
         }
 
         tr {
-            border-bottom: 1px solid var(--border);
-            transition: background 0.2s ease;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
         }
 
-        tr:last-child {
+        tbody tr:last-child {
             border-bottom: none;
         }
 
         tbody tr:hover {
-            background: var(--bg-card-hover);
+            background: var(--bg-secondary);
         }
 
         .subject-name {
-            font-weight: 500;
+            font-weight: 700;
             font-size: 0.9rem;
         }
 
         .mono {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
         }
 
-        .percentage-cell {
+        .percent-cell {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .bar-bg {
+        .percent-bar {
             flex: 1;
-            height: 6px;
-            background: var(--border);
-            border-radius: 3px;
+            height: 12px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 6px;
+            border: 2px solid var(--border-dark);
             overflow: hidden;
             min-width: 60px;
         }
 
-        .bar-fill {
+        .percent-fill {
             height: 100%;
-            border-radius: 3px;
-            transition: width 0.6s ease;
         }
 
-        .bar-fill.success { background: var(--success); }
-        .bar-fill.warning { background: var(--warning); }
-        .bar-fill.danger { background: var(--danger); }
+        .percent-fill.good { background: var(--card-mint); }
+        .percent-fill.warning { background: var(--card-yellow); }
+        .percent-fill.danger { background: var(--card-pink); }
 
-        .percentage-value {
-            font-weight: 600;
-            font-family: 'JetBrains Mono', monospace;
+        .percent-text {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
             font-size: 0.85rem;
             min-width: 48px;
             text-align: right;
         }
 
-        .percentage-value.success { color: var(--success); }
-        .percentage-value.warning { color: var(--warning); }
-        .percentage-value.danger { color: var(--danger); }
-
-        /* Mobile Cards View */
-        .mobile-cards {
+        /* Mobile Cards */
+        .mobile-list {
             display: none;
+            flex-direction: column;
+            gap: 12px;
+            padding: 16px;
         }
 
         @media (max-width: 600px) {
-            .table-scroll {
-                display: none;
-            }
+            .table-scroll { display: none; }
+            .mobile-list { display: flex; }
+        }
 
-            .mobile-cards {
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
-                padding: 16px;
-            }
+        .mobile-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-dark);
+            border-radius: 14px;
+            padding: 16px;
+        }
 
-            .subject-card {
-                background: var(--bg-card-hover);
-                border-radius: 12px;
-                padding: 16px;
-                border: 1px solid var(--border);
-            }
+        .mobile-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
 
-            .subject-card-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                margin-bottom: 12px;
-            }
+        .mobile-card-name {
+            font-weight: 800;
+            font-size: 0.95rem;
+            flex: 1;
+            padding-right: 10px;
+        }
 
-            .subject-card-name {
-                font-weight: 600;
-                font-size: 0.95rem;
-                flex: 1;
-                padding-right: 10px;
-            }
+        .mobile-card-percent {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 4px 10px;
+            border-radius: 8px;
+            border: 2px solid var(--border-dark);
+        }
 
-            .subject-card-percent {
-                font-family: 'JetBrains Mono', monospace;
-                font-weight: 700;
-                font-size: 1.1rem;
-            }
+        .mobile-card-percent.good { background: var(--card-mint); }
+        .mobile-card-percent.warning { background: var(--card-yellow); }
+        .mobile-card-percent.danger { background: var(--card-pink); }
 
-            .subject-card-stats {
-                display: flex;
-                gap: 16px;
-                margin-bottom: 10px;
-            }
+        .mobile-card-stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 10px;
+        }
 
-            .subject-card-stat {
-                display: flex;
-                flex-direction: column;
-                gap: 2px;
-            }
+        .mobile-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
 
-            .subject-card-stat-label {
-                font-size: 0.7rem;
-                color: var(--text-muted);
-                text-transform: uppercase;
-            }
+        .mobile-stat-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            opacity: 0.6;
+        }
 
-            .subject-card-stat-value {
-                font-family: 'JetBrains Mono', monospace;
-                font-weight: 600;
-            }
+        .mobile-stat-value {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+        }
 
-            .subject-card-bar {
-                height: 6px;
-                background: var(--border);
-                border-radius: 3px;
-                overflow: hidden;
-            }
-
-            .subject-card-bar-fill {
-                height: 100%;
-                border-radius: 3px;
-            }
+        .mobile-card-bar {
+            height: 8px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 4px;
+            border: 2px solid var(--border-dark);
+            overflow: hidden;
         }
 
         /* Footer */
         .footer {
             text-align: center;
-            margin-top: 50px;
-            color: var(--text-muted);
-            font-size: 0.85rem;
+            margin-top: 40px;
+            font-weight: 600;
+            color: var(--text-medium);
         }
 
-        .footer a {
-            color: var(--accent);
-            text-decoration: none;
+        .footer-heart {
+            display: inline-block;
+            background: var(--card-pink);
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 2px solid var(--border-dark);
+            margin: 0 4px;
         }
 
-        /* PDF Export Styles */
-        .pdf-export-container {
-            background: #0a0a0f !important;
-            padding: 30px;
+        /* Animations */
+        .stat-box {
+            animation: bounceIn 0.5s ease backwards;
         }
+        .stat-box:nth-child(1) { animation-delay: 0.1s; }
+        .stat-box:nth-child(2) { animation-delay: 0.15s; }
+        .stat-box:nth-child(3) { animation-delay: 0.2s; }
+        .stat-box:nth-child(4) { animation-delay: 0.25s; }
 
-        @media print {
-            body { background: #0a0a0f; }
-            .upload-zone, .instructions, .results-actions, .footer { display: none !important; }
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.8); }
+            60% { transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
         }
     </style>
 </head>
 <body>
-    <div class="bg-grid"></div>
-    <div class="bg-glow"></div>
-    <div class="bg-glow-2"></div>
-    
     <div class="container">
         <header>
             <div class="logo">
-                <div class="logo-icon">X</div>
+                <div class="logo-box">X</div>
                 <span class="logo-text">AttendX</span>
             </div>
-            <p class="tagline">NMIMS Attendance Calculator</p>
         </header>
 
         <div class="instructions">
-            <h3>📋 How to use</h3>
-            <div class="steps">
-                <div class="step">
+            <div class="instructions-title">
+                How to get your PDF
+                <span>4 steps</span>
+            </div>
+            <div class="steps-list">
+                <div class="step-item">
                     <span class="step-num">1</span>
-                    <span>Go to <a href="https://svkm.nmims.edu:8001/sap/bc/ui5_ui5/ui2/ushell/shells/abap/FioriLaunchpad.html" target="_blank">NMIMS SAP Portal</a> and login with your credentials</span>
+                    <span>Open <a href="https://sdc-sppap1.svkm.ac.in:50001/irj/portal" target="_blank">NMIMS SAP Portal</a> and login</span>
                 </div>
-                <div class="step">
+                <div class="step-item">
                     <span class="step-num">2</span>
-                    <span>Open <strong>Student Attendance Report</strong> tile → Select date range → Click <strong>Get Report</strong></span>
+                    <span>Go to Student Attendance Report, select date range</span>
                 </div>
-                <div class="step">
+                <div class="step-item">
                     <span class="step-num">3</span>
-                    <span>Click the <strong>Download PDF</strong> button (use Chrome for best results)</span>
+                    <span>Click Get Report, then download as PDF</span>
                 </div>
-                <div class="step">
+                <div class="step-item">
                     <span class="step-num">4</span>
-                    <span>Upload that PDF here and get your attendance breakdown instantly!</span>
+                    <span>Upload that PDF here — done!</span>
                 </div>
+            </div>
+            <div class="portal-alert">
+                <span class="alert-badge">NOTE</span>
+                Portal only works from 6:00 PM to 7:00 AM
             </div>
         </div>
 
-        <div class="upload-zone" id="uploadZone">
+        <div class="upload-box" id="uploadBox">
             <div class="upload-content">
-                <div class="upload-icon">📄</div>
+                <div class="upload-graphic">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="12" y1="18" x2="12" y2="12"/>
+                        <line x1="9" y1="15" x2="12" y2="12"/>
+                        <line x1="15" y1="15" x2="12" y2="12"/>
+                    </svg>
+                </div>
                 <h2>Drop your PDF here</h2>
-                <p>or click to browse files</p>
-                <button class="btn">
-                    <span>📁</span> Select PDF
-                </button>
+                <p>or click to select file</p>
+                <button class="btn-main">Select PDF</button>
             </div>
             <div class="loader" id="loader">
-                <div class="spinner"></div>
-                <p>Analyzing your attendance...</p>
+                <div class="loader-spinner"></div>
+                <p>Crunching your numbers...</p>
             </div>
             <input type="file" id="fileInput" accept=".pdf">
         </div>
 
         <div class="results" id="results">
-            <div class="results-header">
-                <h2>📊 Your Attendance Report</h2>
-                <div class="results-actions">
-                    <button class="btn btn-export" onclick="exportPDF()">
-                        <span>📥</span> Export PDF
-                    </button>
-                    <button class="btn btn-secondary" onclick="resetCalculator()">
-                        ↻ Upload New
-                    </button>
+            <div class="results-top">
+                <h2 class="results-title">Your Report</h2>
+                <div class="results-btns">
+                    <button class="btn-main btn-save" onclick="saveAsImage()">Save as Image</button>
+                    <button class="btn-main btn-secondary" onclick="resetAll()">Upload New</button>
                 </div>
             </div>
 
             <div id="exportContent">
-                <div class="student-info" id="studentInfo">
-                    <h3>Student Details</h3>
-                    <div class="info-grid" id="infoGrid"></div>
-                </div>
+                <div class="stats-grid" id="statsGrid"></div>
 
-                <div class="overall-stats" id="overallStats"></div>
-
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3>Subject-wise Breakdown</h3>
-                    </div>
+                <div class="table-card">
+                    <div class="table-card-header">Subject Breakdown</div>
                     <div class="table-scroll">
                         <table>
                             <thead>
@@ -735,62 +677,53 @@
                                     <th>Total</th>
                                     <th>Present</th>
                                     <th>Absent</th>
-                                    <th>Percentage</th>
+                                    <th>Attendance</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody"></tbody>
                         </table>
                     </div>
-                    <div class="mobile-cards" id="mobileCards"></div>
+                    <div class="mobile-list" id="mobileList"></div>
                 </div>
             </div>
         </div>
 
         <div class="footer">
-            <p>Made for NMIMS students ✨</p>
+            Made with <span class="footer-heart">care</span> for NMIMS students
         </div>
     </div>
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        const uploadZone = document.getElementById('uploadZone');
+        // Upload handlers
+        const uploadBox = document.getElementById('uploadBox');
         const fileInput = document.getElementById('fileInput');
         const loader = document.getElementById('loader');
         const results = document.getElementById('results');
 
-        // Drag and drop handlers
-        uploadZone.addEventListener('dragover', (e) => {
+        uploadBox.addEventListener('dragover', (e) => {
             e.preventDefault();
-            uploadZone.classList.add('dragover');
+            uploadBox.classList.add('dragover');
         });
 
-        uploadZone.addEventListener('dragleave', () => {
-            uploadZone.classList.remove('dragover');
+        uploadBox.addEventListener('dragleave', () => {
+            uploadBox.classList.remove('dragover');
         });
 
-        uploadZone.addEventListener('drop', (e) => {
+        uploadBox.addEventListener('drop', (e) => {
             e.preventDefault();
-            uploadZone.classList.remove('dragover');
+            uploadBox.classList.remove('dragover');
             const file = e.dataTransfer.files[0];
-            if (file && file.type === 'application/pdf') {
-                processFile(file);
-            }
+            if (file?.type === 'application/pdf') processFile(file);
         });
 
-        uploadZone.addEventListener('click', () => {
-            fileInput.click();
-        });
-
+        uploadBox.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                processFile(file);
-            }
+            if (e.target.files[0]) processFile(e.target.files[0]);
         });
 
         async function processFile(file) {
-            uploadZone.classList.add('processing');
             document.querySelector('.upload-content').style.display = 'none';
             loader.classList.add('active');
 
@@ -801,245 +734,205 @@
                 let fullText = '';
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    const pageText = textContent.items.map(item => item.str).join(' ');
-                    fullText += pageText + '\n';
+                    const content = await page.getTextContent();
+                    fullText += content.items.map(item => item.str).join(' ') + '\n';
                 }
 
-                const data = parseAttendanceData(fullText);
-                displayResults(data);
-            } catch (error) {
-                console.error('Error processing PDF:', error);
-                alert('Error processing PDF. Please make sure it\'s a valid NMIMS attendance report.');
-                resetCalculator();
+                displayResults(parseData(fullText));
+            } catch (err) {
+                console.error(err);
+                alert('Error reading PDF. Make sure it\'s a valid NMIMS attendance report.');
+                resetAll();
             }
         }
 
-        function parseAttendanceData(text) {
-            // Extract student info
-            const studentInfo = {};
+        function parseData(text) {
+            const info = {};
             
-            const nameMatch = text.match(/Student Name\s+([A-Z\s]+?)(?=Student Number)/i);
-            if (nameMatch) studentInfo.name = nameMatch[1].trim();
+            // Student Name - look for pattern before "Student Number"
+            const nameMatch = text.match(/Student\s+Name\s+([A-Z][A-Z\s]+?)(?=\s+Student\s+Number)/i);
+            if (nameMatch) info.name = nameMatch[1].trim();
             
-            const studentNumMatch = text.match(/Student Number\s+(\d+)/i);
-            if (studentNumMatch) studentInfo.studentNumber = studentNumMatch[1].trim();
+            // Student Number (SAP Number)
+            const numMatch = text.match(/Student\s+Number\s+(\d{11,14})/i);
+            if (numMatch) info.sapNumber = numMatch[1].trim();
             
-            const rollMatch = text.match(/Roll No\.\s+([A-Z0-9]+)/i);
-            if (rollMatch) studentInfo.roll = rollMatch[1].trim();
+            // Roll No
+            const rollMatch = text.match(/Roll\s+No\.\s+([A-Z]\d{2,3})/i);
+            if (rollMatch) info.roll = rollMatch[1].trim();
             
-            const programMatch = text.match(/Program Name\s+([A-Z\s()]+?)(?=Attendance)/i);
-            if (programMatch) studentInfo.program = programMatch[1].trim();
+            // Program Name
+            const progMatch = text.match(/Program\s+Name\s+([A-Z][A-Z\s()]+?)(?=\s+Attendance)/i);
+            if (progMatch) info.program = progMatch[1].trim();
 
-            const yearMatch = text.match(/Academic Year.*?(\d{4}-\d{4},\s*Semester\s*[IVX]+)/i);
-            if (yearMatch) studentInfo.academicYear = yearMatch[1].trim();
+            // Academic Year & Semester
+            const yearMatch = text.match(/Academic\s+Year.*?(\d{4}-\d{4}),?\s*(Semester\s*[IVX]+)/i);
+            if (yearMatch) info.year = `${yearMatch[1]}, ${yearMatch[2]}`;
 
-            const durationMatch = text.match(/Duration\s*:\s*From\s+([\d.]+)\s+to\s+([\d.]+)/i);
-            if (durationMatch) studentInfo.duration = `${durationMatch[1]} to ${durationMatch[2]}`;
+            // Duration
+            const durMatch = text.match(/Duration\s*:\s*From\s+([\d.]+)\s+to\s+([\d.]+)/i);
+            if (durMatch) info.duration = `${durMatch[1]} to ${durMatch[2]}`;
 
-            // Parse attendance records
             const subjects = {};
+            const pattern = /([A-Za-z\s&]+)-7405-T1-B\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d+),\s+(\d{4})\s+[\d:]+\s+[AP]M\s+[\d:]+\s+[AP]M\s+(P|A|AG|L|NU)/gi;
             
-            // Pattern to match attendance entries
-            const entryPattern = /([A-Za-z\s&]+)-7405-T1-B\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d+),\s+(\d{4})\s+[\d:]+\s+[AP]M\s+[\d:]+\s+[AP]M\s+(P|A|AG|L|NU)/gi;
-            
-            let match;
-            while ((match = entryPattern.exec(text)) !== null) {
-                const subjectName = match[1].trim();
-                const status = match[5].toUpperCase();
-                
-                // Skip NU entries
+            let m;
+            while ((m = pattern.exec(text)) !== null) {
+                const subj = m[1].trim();
+                const status = m[5].toUpperCase();
                 if (status === 'NU') continue;
                 
-                if (!subjects[subjectName]) {
-                    subjects[subjectName] = { present: 0, absent: 0 };
-                }
+                if (!subjects[subj]) subjects[subj] = { present: 0, absent: 0 };
                 
-                if (status === 'P' || status === 'AG' || status === 'L') {
-                    subjects[subjectName].present++;
-                } else if (status === 'A') {
-                    subjects[subjectName].absent++;
-                }
+                if (['P', 'AG', 'L'].includes(status)) subjects[subj].present++;
+                else if (status === 'A') subjects[subj].absent++;
             }
 
-            // Convert to array and calculate totals
-            const subjectData = Object.entries(subjects).map(([name, data]) => {
+            const subjectList = Object.entries(subjects).map(([name, data]) => {
                 const total = data.present + data.absent;
-                const percentage = total > 0 ? ((data.present / total) * 100).toFixed(1) : 0;
                 return {
-                    name: formatSubjectName(name),
+                    name: formatName(name),
                     total,
                     present: data.present,
                     absent: data.absent,
-                    percentage: parseFloat(percentage)
+                    percentage: total > 0 ? parseFloat(((data.present / total) * 100).toFixed(1)) : 0
                 };
-            });
+            }).sort((a, b) => a.name.localeCompare(b.name));
 
-            // Sort by subject name
-            subjectData.sort((a, b) => a.name.localeCompare(b.name));
-
-            return { studentInfo, subjects: subjectData };
+            return { info, subjects: subjectList };
         }
 
-        function formatSubjectName(name) {
-            const nameMap = {
+        function formatName(name) {
+            const map = {
                 'Mktg of Financial Services': 'Marketing of Financial Services',
-                'Direct and Indirect Tax': 'Direct and Indirect Tax',
-                'Fincil Reptg Stds and Anlys II': 'Financial Reporting Stds & Analysis II',
-                'Finacil Planning & Welth Mgmt': 'Financial Planning & Wealth Mgmt',
-                'Applied Econometrics': 'Applied Econometrics',
-                'Technical Analysis': 'Technical Analysis'
+                'Fincil Reptg Stds and Anlys II': 'Financial Reporting & Analysis II',
+                'Finacil Planning & Welth Mgmt': 'Financial Planning & Wealth Mgmt'
             };
-            return nameMap[name] || name;
+            return map[name] || name;
         }
 
-        function getPercentageClass(percentage) {
-            if (percentage >= 80) return 'success';
-            if (percentage >= 70) return 'warning';
+        function getClass(p) {
+            if (p >= 75) return 'good';
+            if (p >= 65) return 'warning';
             return 'danger';
         }
 
         function displayResults(data) {
-            // Student info
-            const infoGrid = document.getElementById('infoGrid');
-            infoGrid.innerHTML = '';
-            
-            if (data.studentInfo.name) {
-                infoGrid.innerHTML += `<div class="info-item"><span class="info-label">Name</span><span class="info-value">${data.studentInfo.name}</span></div>`;
-            }
-            if (data.studentInfo.studentNumber) {
-                infoGrid.innerHTML += `<div class="info-item"><span class="info-label">SAP Number</span><span class="info-value">${data.studentInfo.studentNumber}</span></div>`;
-            }
-            if (data.studentInfo.roll) {
-                infoGrid.innerHTML += `<div class="info-item"><span class="info-label">Roll No</span><span class="info-value">${data.studentInfo.roll}</span></div>`;
-            }
-            if (data.studentInfo.program) {
-                infoGrid.innerHTML += `<div class="info-item"><span class="info-label">Program</span><span class="info-value">${data.studentInfo.program}</span></div>`;
-            }
-            if (data.studentInfo.academicYear) {
-                infoGrid.innerHTML += `<div class="info-item"><span class="info-label">Academic Year</span><span class="info-value">${data.studentInfo.academicYear}</span></div>`;
-            }
-            if (data.studentInfo.duration) {
-                infoGrid.innerHTML += `<div class="info-item"><span class="info-label">Report Duration</span><span class="info-value">${data.studentInfo.duration}</span></div>`;
-            }
+            // Stats
+            const total = data.subjects.reduce((s, x) => s + x.total, 0);
+            const present = data.subjects.reduce((s, x) => s + x.present, 0);
+            const absent = data.subjects.reduce((s, x) => s + x.absent, 0);
+            const overall = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
 
-            // Calculate overall stats
-            const totalLectures = data.subjects.reduce((sum, s) => sum + s.total, 0);
-            const totalPresent = data.subjects.reduce((sum, s) => sum + s.present, 0);
-            const totalAbsent = data.subjects.reduce((sum, s) => sum + s.absent, 0);
-            const overallPercentage = totalLectures > 0 ? ((totalPresent / totalLectures) * 100).toFixed(1) : 0;
-
-            const statsContainer = document.getElementById('overallStats');
-            statsContainer.innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-value accent">${totalLectures}</div>
-                    <div class="stat-label">Total Lectures</div>
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-box total">
+                    <div class="stat-number">${total}</div>
+                    <div class="stat-label">Total</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value success">${totalPresent}</div>
+                <div class="stat-box present">
+                    <div class="stat-number">${present}</div>
                     <div class="stat-label">Present</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value danger">${totalAbsent}</div>
+                <div class="stat-box absent">
+                    <div class="stat-number">${absent}</div>
                     <div class="stat-label">Absent</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value ${getPercentageClass(overallPercentage)}">${overallPercentage}%</div>
+                <div class="stat-box overall">
+                    <div class="stat-number">${overall}%</div>
                     <div class="stat-label">Overall</div>
                 </div>
             `;
 
-            // Desktop table
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
+            // Table
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            const mobileList = document.getElementById('mobileList');
+            mobileList.innerHTML = '';
 
-            // Mobile cards
-            const mobileCards = document.getElementById('mobileCards');
-            mobileCards.innerHTML = '';
-
-            data.subjects.forEach(subject => {
-                const percentClass = getPercentageClass(subject.percentage);
+            data.subjects.forEach(s => {
+                const cls = getClass(s.percentage);
                 
-                // Desktop row
-                tableBody.innerHTML += `
+                tbody.innerHTML += `
                     <tr>
-                        <td class="subject-name">${subject.name}</td>
-                        <td class="mono">${subject.total}</td>
-                        <td class="mono">${subject.present}</td>
-                        <td class="mono">${subject.absent}</td>
+                        <td class="subject-name">${s.name}</td>
+                        <td class="mono">${s.total}</td>
+                        <td class="mono">${s.present}</td>
+                        <td class="mono">${s.absent}</td>
                         <td>
-                            <div class="percentage-cell">
-                                <div class="bar-bg">
-                                    <div class="bar-fill ${percentClass}" style="width: ${subject.percentage}%"></div>
+                            <div class="percent-cell">
+                                <div class="percent-bar">
+                                    <div class="percent-fill ${cls}" style="width:${s.percentage}%"></div>
                                 </div>
-                                <span class="percentage-value ${percentClass}">${subject.percentage}%</span>
+                                <span class="percent-text">${s.percentage}%</span>
                             </div>
                         </td>
                     </tr>
                 `;
 
-                // Mobile card
-                mobileCards.innerHTML += `
-                    <div class="subject-card">
-                        <div class="subject-card-header">
-                            <span class="subject-card-name">${subject.name}</span>
-                            <span class="subject-card-percent ${percentClass}">${subject.percentage}%</span>
+                mobileList.innerHTML += `
+                    <div class="mobile-card">
+                        <div class="mobile-card-top">
+                            <span class="mobile-card-name">${s.name}</span>
+                            <span class="mobile-card-percent ${cls}">${s.percentage}%</span>
                         </div>
-                        <div class="subject-card-stats">
-                            <div class="subject-card-stat">
-                                <span class="subject-card-stat-label">Total</span>
-                                <span class="subject-card-stat-value">${subject.total}</span>
+                        <div class="mobile-card-stats">
+                            <div class="mobile-stat">
+                                <span class="mobile-stat-label">Total</span>
+                                <span class="mobile-stat-value">${s.total}</span>
                             </div>
-                            <div class="subject-card-stat">
-                                <span class="subject-card-stat-label">Present</span>
-                                <span class="subject-card-stat-value" style="color: var(--success)">${subject.present}</span>
+                            <div class="mobile-stat">
+                                <span class="mobile-stat-label">Present</span>
+                                <span class="mobile-stat-value">${s.present}</span>
                             </div>
-                            <div class="subject-card-stat">
-                                <span class="subject-card-stat-label">Absent</span>
-                                <span class="subject-card-stat-value" style="color: var(--danger)">${subject.absent}</span>
+                            <div class="mobile-stat">
+                                <span class="mobile-stat-label">Absent</span>
+                                <span class="mobile-stat-value">${s.absent}</span>
                             </div>
                         </div>
-                        <div class="subject-card-bar">
-                            <div class="subject-card-bar-fill ${percentClass}" style="width: ${subject.percentage}%; background: var(--${percentClass})"></div>
+                        <div class="mobile-card-bar">
+                            <div class="percent-fill ${cls}" style="width:${s.percentage}%"></div>
                         </div>
                     </div>
                 `;
             });
 
-            uploadZone.style.display = 'none';
+            uploadBox.style.display = 'none';
             results.classList.add('active');
         }
 
-        function resetCalculator() {
-            uploadZone.style.display = 'block';
-            uploadZone.classList.remove('processing');
+        function resetAll() {
+            uploadBox.style.display = 'block';
             document.querySelector('.upload-content').style.display = 'block';
             loader.classList.remove('active');
             results.classList.remove('active');
             fileInput.value = '';
         }
 
-        function exportPDF() {
-            const element = document.getElementById('exportContent');
-            const studentName = document.querySelector('.info-value')?.textContent || 'Attendance';
-            
-            const opt = {
-                margin: [10, 10, 10, 10],
-                filename: `AttendX_${studentName.replace(/\s+/g, '_')}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2,
-                    backgroundColor: '#0a0a0f',
-                    useCORS: true
-                },
-                jsPDF: { 
-                    unit: 'mm', 
-                    format: 'a4', 
-                    orientation: 'portrait' 
-                }
-            };
+        async function saveAsImage() {
+            const btn = document.querySelector('.btn-save');
+            btn.textContent = 'Saving...';
+            btn.disabled = true;
 
-            html2pdf().set(opt).from(element).save();
+            try {
+                const el = document.getElementById('exportContent');
+                const canvas = await html2canvas(el, {
+                    scale: 2,
+                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-main').trim(),
+                    useCORS: true
+                });
+
+                const link = document.createElement('a');
+                const name = document.querySelector('.student-value')?.textContent || 'Attendance';
+                link.download = `AttendX_${name.replace(/\s+/g, '_')}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (err) {
+                console.error(err);
+                alert('Failed to save image. Try again.');
+            } finally {
+                btn.textContent = 'Save as Image';
+                btn.disabled = false;
+            }
         }
     </script>
 </body>
