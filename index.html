@@ -155,6 +155,245 @@
             }
         }
 
+        /* GenZ Animations */
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes progressBounce {
+            0% { width: 0%; }
+            80% { width: calc(var(--target-width) + 3%); }
+            100% { width: var(--target-width); }
+        }
+
+        @keyframes floatShape {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(10px, -10px) rotate(5deg); }
+            50% { transform: translate(0, -15px) rotate(0deg); }
+            75% { transform: translate(-10px, -10px) rotate(-5deg); }
+        }
+
+        /* Floating background shapes */
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.15;
+            animation: floatShape 8s ease-in-out infinite;
+        }
+
+        .shape-1 {
+            width: 100px;
+            height: 100px;
+            background: var(--accent);
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .shape-2 {
+            width: 60px;
+            height: 60px;
+            background: var(--card-mint);
+            top: 60%;
+            right: 10%;
+            animation-delay: -2s;
+        }
+
+        .shape-3 {
+            width: 80px;
+            height: 80px;
+            background: var(--card-yellow);
+            bottom: 20%;
+            left: 15%;
+            animation-delay: -4s;
+        }
+
+        .shape-4 {
+            width: 50px;
+            height: 50px;
+            background: var(--card-pink);
+            top: 30%;
+            right: 20%;
+            animation-delay: -6s;
+        }
+
+        /* Logo wiggle on hover */
+        .logo-box {
+            width: 48px;
+            height: 48px;
+            background: var(--card-yellow);
+            border: 3px solid var(--border-dark);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--text-dark);
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover .logo-box {
+            animation: wiggle 0.5s ease;
+        }
+
+        /* Bouncy hover on cards */
+        .stat-box {
+            background: var(--white);
+            border: 3px solid var(--border-dark);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 6px 8px 0px var(--border-dark);
+        }
+
+        /* Gradient animation on overall box */
+        .stat-box.overall {
+            background: linear-gradient(135deg, var(--accent), #8b8bf5, var(--accent));
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
+            color: white;
+        }
+
+        /* Results slide in */
+        .results.active {
+            display: block;
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        .results.active .stat-box {
+            animation: bounceIn 0.5s ease-out backwards;
+        }
+
+        .results.active .stat-box:nth-child(1) { animation-delay: 0.1s; }
+        .results.active .stat-box:nth-child(2) { animation-delay: 0.2s; }
+        .results.active .stat-box:nth-child(3) { animation-delay: 0.3s; }
+        .results.active .stat-box:nth-child(4) { animation-delay: 0.4s; }
+
+        /* Bouncy progress bar fill */
+        .percent-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Upload box hover */
+        .upload-box {
+            background: var(--card-mint);
+            border: 3px dashed var(--border-dark);
+            border-radius: 20px;
+            padding: 48px 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-box:hover {
+            transform: scale(1.02);
+            border-style: solid;
+            box-shadow: var(--shadow);
+        }
+
+        /* Table card hover */
+        .table-card {
+            background: var(--white);
+            border: 3px solid var(--border-dark);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Mobile card bounce */
+        .mobile-card {
+            background: var(--white);
+            border: 3px solid var(--border-dark);
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .mobile-card:hover {
+            transform: translateY(-4px);
+        }
+
+        /* Instructions card float */
+        .instructions {
+            background: var(--card-cream);
+            border: 3px solid var(--border-dark);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* Student card */
+        .student-card {
+            background: var(--card-lavender);
+            border: 3px solid var(--border-dark);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .student-card:hover {
+            transform: translateY(-4px);
+        }
+
         @media (max-width: 600px) {
             .hero-tagline {
                 font-size: 1.5rem;
@@ -181,15 +420,6 @@
         }
 
         /* Instructions */
-        .instructions {
-            background: var(--card-cream);
-            border: 3px solid var(--border-dark);
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-        }
-
         .instructions-title {
             font-size: 1.1rem;
             font-weight: 800;
@@ -271,23 +501,6 @@
         }
 
         /* Upload */
-        .upload-box {
-            background: var(--card-mint);
-            border: 3px solid var(--border-dark);
-            border-radius: 24px;
-            padding: 48px 32px;
-            text-align: center;
-            cursor: pointer;
-            box-shadow: var(--shadow);
-            transition: all 0.2s ease;
-            position: relative;
-        }
-
-        .upload-box:hover {
-            transform: translate(-3px, -3px);
-            box-shadow: 7px 7px 0px var(--border-dark);
-        }
-
         .upload-box.dragover {
             background: var(--card-yellow);
             transform: scale(1.02);
@@ -395,11 +608,6 @@
             margin-top: 24px;
         }
 
-        .results.active {
-            display: block;
-            animation: popUp 0.4s ease;
-        }
-
         @keyframes popUp {
             from { opacity: 0; transform: translateY(20px) scale(0.98); }
             to { opacity: 1; transform: translateY(0) scale(1); }
@@ -439,15 +647,6 @@
         }
 
         /* Student Card */
-        .student-card {
-            background: var(--card-lavender);
-            border: 3px solid var(--border-dark);
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow);
-        }
-
         .student-card-title {
             font-size: 0.75rem;
             font-weight: 800;
@@ -497,20 +696,6 @@
             margin-bottom: 16px;
         }
 
-        .stat-box {
-            border: 3px solid var(--border-dark);
-            border-radius: 16px;
-            padding: 20px 16px;
-            text-align: center;
-            box-shadow: var(--shadow);
-            transition: all 0.2s ease;
-        }
-
-        .stat-box:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0px var(--border-dark);
-        }
-
         .stat-number {
             font-size: 2.2rem;
             font-weight: 900;
@@ -550,35 +735,8 @@
         .stat-box.total { background: var(--card-lavender); }
         .stat-box.present { background: var(--card-mint); }
         .stat-box.absent { background: var(--card-yellow); }
-        .stat-box.overall { background: var(--accent); }
-
-        .stat-box.overall .stat-number,
-        .stat-box.overall .stat-label { color: var(--white); }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 900;
-            font-family: 'Space Mono', monospace;
-            color: var(--text-dark);
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            opacity: 0.8;
-            margin-top: 4px;
-        }
 
         /* Table Card */
-        .table-card {
-            background: var(--white);
-            border: 3px solid var(--border-dark);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-        }
-
         .table-card-header {
             background: var(--card-peach);
             padding: 16px 20px;
@@ -691,13 +849,6 @@
         @media (max-width: 600px) {
             .table-scroll { display: none; }
             .mobile-list { display: flex; }
-        }
-
-        .mobile-card {
-            background: var(--bg-secondary);
-            border: 2px solid var(--border-dark);
-            border-radius: 14px;
-            padding: 16px;
         }
 
         .mobile-card-top {
@@ -868,6 +1019,13 @@
     </style>
 </head>
 <body>
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+    </div>
+
     <div class="container">
         <header>
             <div class="logo">
